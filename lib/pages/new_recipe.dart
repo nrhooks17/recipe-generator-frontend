@@ -51,7 +51,8 @@ class _NewRecipeState extends State<NewRecipe> {
       String labelText,
       void Function() addField,
       void Function(int) removeField,
-      String recipeListType) {
+      String recipeListType
+      ) {
 
     String recipeListLabel = "";
     switch (recipeListType.toLowerCase()) {
@@ -63,58 +64,61 @@ class _NewRecipeState extends State<NewRecipe> {
         break;
 
     }
-
     return Padding(
       padding:  EdgeInsets.all(10),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Padding(
-            padding:  EdgeInsets.only(left: 10, right: 10, bottom: 10),
-            child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Container(
+            alignment: Alignment.centerLeft,
+            width: double.infinity,
+            child: Wrap(
+                alignment: WrapAlignment.start,
+                spacing: 15.0,
                 children: [
                   Text('Enter ${recipeListLabel}s',
-                      style: TextStyle(fontSize: 30)),
-                  ElevatedButton(
-                    onPressed: () => addRecipeIngredientField(),
-                    child: Text('Add Ingredient'),
+                      style: const TextStyle(fontSize: 30)
                   ),
                 ]),
           ),
-          SizedBox(
-              height: 200,
-              child: ListView.builder(
-                itemCount: _recipeIngredientTextControllers.length,
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding:  EdgeInsets.only(bottom: 10),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        SizedBox(
-                          width: 800,
-                          child: TextField(
-                              controller:
-                                  _recipeIngredientTextControllers[index],
-                              maxLines: null,
-                              decoration: InputDecoration(
-                                border: OutlineInputBorder(),
-                                hintText: 'Enter Ingredient',
-                                labelText: 'Ingredient',
-                                suffixIcon: Icon(Icons.remove),
-                              )),
-                        ),
-                        TextButton.icon(
-                          label: Text('Remove'),
-                          icon: Icon(Icons.remove_circle),
-                          onPressed: () => removeRecipeIngredientField(index),
-                        )
-                      ], // children
-                    ),
-                  );
-                },
-              ))
+          Column(
+              children:  [
+                   ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: controllers.length,
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                  controller: controllers[index],
+                                  maxLines: null,
+                                  decoration: InputDecoration(
+                                    hintText: 'Enter $recipeListLabel',
+                                    suffixIcon: IconButton(
+                                      onPressed: controllers[index].clear,
+                                      icon: const Icon(Icons.clear)
+                                    ),
+                                    prefixIcon: IconButton(
+                                      onPressed: () => removeField(index),
+                                      icon: const Icon(Icons.remove_circle)
+                                    )
+                                  )),
+                            ),
+                          ], // children
+                        ), //row
+                      ); //padding
+                    },
+                  ),// listview.builder
+            ], // children
+          ),
+          ElevatedButton(
+              onPressed: () => addField(),
+              child: Text('Add $recipeListLabel')
+          ),
         ],
       ),
     );
@@ -137,45 +141,57 @@ class _NewRecipeState extends State<NewRecipe> {
           ),
         ],
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Padding(
-              padding: EdgeInsets.all(10),
-              child: Column(
-                children: [
-                  TextField(
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      hintText: 'Enter recipe name',
-                      labelText: 'Recipe Name',
+      body: SingleChildScrollView(
+        child: Transform.scale(
+            scale: 0.9,
+            child: Center(
+                child:  Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Padding(
+                      padding: getNewRecipePadding(),
+                      child: const Column(
+                        children: [
+                          TextField(
+                            decoration: InputDecoration(
+                              border: OutlineInputBorder(),
+                              hintText: 'Enter recipe name',
+                              labelText: 'Recipe Name',
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-            const Padding(
-              padding: EdgeInsets.all(10),
-              child: Column(
-                children: <Widget>[
-                  TextField(
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      hintText: 'Enter Cooking Procedure',
-                      labelText: 'Cooking Procedure',
+                    Padding(
+                      padding: getNewRecipePadding(),
+                      child: Column(
+                        children: <Widget>[
+                          //change this list so that it has 3 textboxes instead of 1.
+                          buildRecipeListWidget(_recipeIngredientTextControllers, "Ingredient", addRecipeIngredientField, removeRecipeIngredientField, 'ingredient')
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () => AlertUtil.showAlert(context),
-              child: const Text('Save Recipe'),
-            ),
-          ],
+                    Padding(
+                      padding: getNewRecipePadding(),
+                      child: Column(
+                        children: <Widget>[
+                          buildRecipeListWidget(_recipeProcedureTextControllers, "Procedure", addRecipeProcedureField, removeRecipeProcedureField, 'procedure')
+                        ],
+                      ),
+                    ),
+                    ElevatedButton(
+                      onPressed: () => AlertUtil.showAlert(context),
+                      child: const Text('Save Recipe'),
+                    ),
+                  ],
+                )
+            )
         ),
-      ),
+      )
     );
+  }
+
+  EdgeInsets getNewRecipePadding() {
+    return const EdgeInsets.only(top: 1, left: 10, right: 10);
   }
 }
