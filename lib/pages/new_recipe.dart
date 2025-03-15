@@ -6,7 +6,6 @@ import 'package:recipe_generator/widgets/new-recipe/procedure_list_widget.dart';
 import '../utils/alert.dart';
 import '../models/ingredient.dart';
 
-
 class NewRecipe extends StatefulWidget {
   const NewRecipe({super.key});
 
@@ -14,53 +13,79 @@ class NewRecipe extends StatefulWidget {
   State<NewRecipe> createState() => _NewRecipeState();
 }
 
-
 class _NewRecipeState extends State<NewRecipe> {
   // List of TextEditingController for recipe ingredients
   final List<TextEditingController> _recipeIngredientTextControllers =
       <TextEditingController>[TextEditingController()];
-  final List<Ingredient> _ingredients = [Ingredient(amount: 0, unitOfMeasurement: "", ingredientName: "")];
+  final List<Ingredient> _ingredients = [
+    Ingredient(amount: 0, unitOfMeasurement: "", ingredientName: "")
+  ];
 
   // List of TextEditingController for recipe procedure
   final List<TextEditingController> _recipeProcedureTextControllers =
       <TextEditingController>[TextEditingController()];
   final List<String> _procedure = [""];
   String _recipeName = "";
+  String _description = "";
+  int _prepTimeMinutes = 0;
+  int _cookTimeMinutes = 0;
+  int _servings = 0;
 
   // loading state
-  bool isLoading = false;
+  bool _isLoading = false;
+
 
   //function that sends the data to the backend.
 
-  Future<void> submitRecipe() async{
+  Future<void> submitRecipe() async {
     try {
-
       final response = await http.post(
-        Uri.parse("http://localhost:3000"),
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        Uri.parse("http://localhost:8080/recipe/submit"),
+        headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'recipeName': _recipeName,
+          'description': _description,
+          'prepTimeMinutes': _prepTimeMinutes,
+          'cookTimeMinutes': _cookTimeMinutes,
+          'servings': _servings,
           'ingredients': _ingredients,
           'procedure': _procedure,
         }),
       );
+
+      if (response.statusCode == 200) {
+        if (mounted) {
+          Map<String, dynamic> responseBody = jsonDecode(response.body);
+
+          ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('${responseBody['recipeName']} has been submitted successfully.'))
+          );
+        }
+      } else {
+        throw Exception("Failed to submit recipe data: ${response.statusCode}");
+      }
     } catch (error) {
-
-      // 10, 25, 35, 35, 60
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error submitting recipe data: $error'))
+        );
+      }
     } finally {
-
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
-
 
   // lots of state management here. but app isn't that complex. Next app i'll use something more complex
   // Add a new recipe ingredient field
   void addRecipeIngredientField() {
     setState(() {
       _recipeIngredientTextControllers.add(TextEditingController());
-      _ingredients.add(Ingredient(amount: 0, unitOfMeasurement:  "", ingredientName: ""));
+      _ingredients.add(
+          Ingredient(amount: 0, unitOfMeasurement: "", ingredientName: ""));
     });
   }
 
@@ -88,20 +113,27 @@ class _NewRecipeState extends State<NewRecipe> {
   }
 
   // onChange for amount textfield
-  void changeAmount(String value, int index){
+  void changeAmount(String value, int index) {
     Ingredient ingredient = _ingredients.elementAt(index);
-    ingredient.amount = double.parse(value);
+
+    // if the value is empty, then a
+    if (value == "") {
+      ingredient.amount = 0;
+    } else {
+      ingredient.amount = double.parse(value);
+    }
     _ingredients[index] = ingredient;
   }
+
   // onChange for unitOfmeasurement textfield
-  void changeUnitOfMeasurement(String value, int index){
+  void changeUnitOfMeasurement(String value, int index) {
     Ingredient ingredient = _ingredients.elementAt(index);
     ingredient.unitOfMeasurement = value;
     _ingredients[index] = ingredient;
   }
 
   // onChange for IngredientName textfield
-  void changeIngredientName(String value, int index){
+  void changeIngredientName(String value, int index) {
     Ingredient ingredient = _ingredients.elementAt(index);
     ingredient.ingredientName = value;
     _ingredients[index] = ingredient;
@@ -115,6 +147,22 @@ class _NewRecipeState extends State<NewRecipe> {
   // onchange for recipeName
   void changeRecipeName(String value) {
     _recipeName = value;
+  }
+
+  void changeDescription(String value) {
+    _description = value;
+  }
+
+  void changePrepTimeMinutes(String value) {
+    _prepTimeMinutes = int.parse(value);
+  }
+
+  void changeCookTimeMinutes(String value) {
+    _cookTimeMinutes = int.parse(value);
+  }
+
+  void changeServings(String value) {
+    _servings = int.parse(value);
   }
 
   @override
@@ -153,6 +201,58 @@ class _NewRecipeState extends State<NewRecipe> {
                           ),
                           onChanged: (value) => changeRecipeName(value),
                         ),
+                      ], //children
+                    ),
+                  ),
+                  Padding(
+                    padding: getNewRecipePadding(),
+                    child: Column(
+                      children: [
+                        TextField(
+                          maxLines: null,
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(),
+                            hintText: 'Enter recipe description',
+                            labelText: 'Description'
+                          ),
+                          onChanged: (value) => changeDescription(value)
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: getNewRecipePadding(),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            decoration: InputDecoration(
+                                border: OutlineInputBorder(),
+                                hintText: 'Enter prep time',
+                                labelText: 'Prep Time(min)'
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 10),
+                        Expanded(
+                          child: TextField(
+                            decoration: InputDecoration(
+                                border: OutlineInputBorder(),
+                                hintText: 'Enter cook time',
+                                labelText: 'Cook Time(min)'
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 10),
+                        Expanded(
+                          child: TextField(
+                            decoration: InputDecoration(
+                                border: OutlineInputBorder(),
+                                hintText: 'Enter servings',
+                                labelText: 'Servings'
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -190,7 +290,7 @@ class _NewRecipeState extends State<NewRecipe> {
                     ),
                   ),
                   ElevatedButton(
-                    onPressed: () => AlertUtil.showAlert(context),
+                    onPressed: submitRecipe,
                     child: const Text('Save Recipe'),
                   ),
                 ],
@@ -199,6 +299,6 @@ class _NewRecipeState extends State<NewRecipe> {
   }
 
   EdgeInsets getNewRecipePadding() {
-    return const EdgeInsets.only(top: 1, left: 10, right: 10);
+    return const EdgeInsets.only(top: 10, left: 10, right: 10);
   }
 }

@@ -31,6 +31,7 @@ class IngredientListWidget extends RecipeListWidget {
           textAlign: TextAlign.right,
           decoration: InputDecoration(
               hintText: 'unit amount',
+              labelText: 'Unit amount',
               border: OutlineInputBorder(),
               prefixIcon: IconButton(
                 onPressed: () => removeField(index),
@@ -40,23 +41,25 @@ class IngredientListWidget extends RecipeListWidget {
           onChanged: (value) => changeAmount(value, index),
         ),
       ),
-      SizedBox(width: 5), // Keep small fixed spacing between fields
+      SizedBox(width: 10), // Keep small fixed spacing between fields
       Expanded(
         flex: 3, // Takes 3 parts of the space
         child: TextField(
           decoration: InputDecoration(
-          hintText: 'cups',
+          hintText: 'Unit of measurement',
+          labelText: 'Unit',
             border: OutlineInputBorder(),
           ),
           onChanged: (value) => changeUnitOfMeasurement(value, index),
         ),
       ),
-      SizedBox(width: 5),
+      SizedBox(width: 10),
       Expanded(
         flex: 7, // Takes 7 parts of the space
         child: TextField(
           decoration: InputDecoration(
             hintText: 'ingredient name',
+            labelText: 'Ingredient',
             border: OutlineInputBorder(),
           ),
           onChanged: (value) => changeIngredientName(value, index),
