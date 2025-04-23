@@ -16,4 +16,18 @@ class Ingredient{
         "ingredientName": ingredientName,
       };
   }
+
+  static Ingredient fromJson(Map<String, dynamic> json){
+
+    // check if amount is an int. if so, convert it to a double.
+    if (json['amount'] is int) {
+      json['amount'] = json['amount'].toDouble();
+    }
+
+    return Ingredient(
+      amount: json['amount'],
+      unitOfMeasurement: json['unitOfMeasurement'],
+      ingredientName: json['ingredientName'],
+    );
+  }
 }

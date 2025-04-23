@@ -5,6 +5,7 @@ import 'package:recipe_generator/widgets/new-recipe/ingredient_list_widget.dart'
 import 'package:recipe_generator/widgets/new-recipe/procedure_list_widget.dart';
 import '../utils/alert.dart';
 import '../models/ingredient.dart';
+import '../main.dart';
 
 class NewRecipe extends StatefulWidget {
   const NewRecipe({super.key});
@@ -39,6 +40,11 @@ class _NewRecipeState extends State<NewRecipe> {
 
   Future<void> submitRecipe() async {
     try {
+      // Set loading state to true
+      setState(() {
+        _isLoading = true;
+      });
+
       final response = await http.post(
         Uri.parse("http://localhost:8080/recipe/submit"),
         headers: {'Content-Type': 'application/json'},
@@ -57,10 +63,19 @@ class _NewRecipeState extends State<NewRecipe> {
         if (mounted) {
           Map<String, dynamic> responseBody = jsonDecode(response.body);
 
+          // show snackbar success message.
           ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('${responseBody['recipeName']} has been submitted successfully.'))
           );
+
+          // Navigate back to the home page after recipe submission.
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const MyHomePage(title: 'Recipe Generator')),
+          );
         }
+
+
       } else {
         throw Exception("Failed to submit recipe data: ${response.statusCode}");
       }
@@ -175,7 +190,7 @@ class _NewRecipeState extends State<NewRecipe> {
               padding: const EdgeInsets.only(right: 15.0),
               child: ElevatedButton(
                 onPressed: () {
-                  AlertUtil.showAlert(context);
+                  AlertUtil.showAlert(context, "Random Recipe", "Generating a random recipe...");
                 },
                 child: const Text('Select Random Recipe'),
               ),
@@ -186,12 +201,12 @@ class _NewRecipeState extends State<NewRecipe> {
           child: Transform.scale(
               scale: 0.9,
               child: Center(
-                  child: Column(
+                child: _isLoading ? CircularProgressIndicator() : Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   Padding(
                     padding: getNewRecipePadding(),
-                    child: Column(
+                    child:  Column(
                       children: [
                         TextField(
                           decoration: InputDecoration(
