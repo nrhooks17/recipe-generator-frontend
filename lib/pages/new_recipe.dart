@@ -3,9 +3,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:recipe_generator/widgets/new-recipe/ingredient_list_widget.dart';
 import 'package:recipe_generator/widgets/new-recipe/procedure_list_widget.dart';
-import '../utils/alert.dart';
 import '../models/ingredient.dart';
 import '../main.dart';
+import '../pages/view_recipe.dart';
 
 class NewRecipe extends StatefulWidget {
   const NewRecipe({super.key});
@@ -190,7 +190,10 @@ class _NewRecipeState extends State<NewRecipe> {
               padding: const EdgeInsets.only(right: 15.0),
               child: ElevatedButton(
                 onPressed: () {
-                  AlertUtil.showAlert(context, "Random Recipe", "Generating a random recipe...");
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const ViewRecipe()),
+                  );
                 },
                 child: const Text('Select Random Recipe'),
               ),

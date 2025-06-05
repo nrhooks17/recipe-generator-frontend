@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:recipe_generator/models/recipe.dart';
-import 'package:logging/logging.dart';
 import 'dart:convert';
-import '../utils/alert.dart';
 
 class ViewRecipe extends StatefulWidget {
   const ViewRecipe({super.key}); // TODO: implement
