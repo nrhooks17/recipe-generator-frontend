@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:recipe_generator/models/recipe.dart';
-import 'dart:convert';
+import 'package:recipe_generator/providers/recipe_provider.dart';
 
 class ViewRecipe extends StatefulWidget {
   const ViewRecipe({super.key}); // TODO: implement
@@ -11,45 +9,22 @@ class ViewRecipe extends StatefulWidget {
 }
 
 class _ViewRecipeState extends State<ViewRecipe> {
+  late RecipeProvider _recipeProvider;
+
   @override
   void initState() {
     super.initState();
-    getRandomRecipe();
+    _recipeProvider = RecipeProvider();
+    _recipeProvider.addListener(() {
+      setState(() {});
+    });
+    _recipeProvider.getRandomRecipe(context);
   }
 
-  Recipe _recipe = Recipe(
-    recipeName: '',
-    description: '',
-    prepTimeMinutes: 0,
-    cookTimeMinutes: 0,
-    servings: 0,
-    ingredients: [],
-    procedure: [],
-  );
-
-  // grab random recipe from backend
-  Future<void> getRandomRecipe() async {
-    try {
-      // grab recipe from backend
-      final response =
-          await http.get(Uri.parse("http://localhost:8080/recipe/random"));
-
-      if (response.statusCode == 200) {
-        // debug
-        Map<String, dynamic> responseBody = jsonDecode(response.body);
-        //set the recipe after getting it from the backend.
-        setState(() {
-          _recipe = Recipe.fromJson(responseBody);
-        });
-      }
-    } catch (error, stacktrace) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error retrieving recipe: $error')));
-        print('Error retrieving recipe: $error');
-        print('Stacktrace: $stacktrace');
-      }
-    }
+  @override
+  void dispose() {
+    _recipeProvider.dispose();
+    super.dispose();
   }
 
   @override
@@ -71,7 +46,7 @@ class _ViewRecipeState extends State<ViewRecipe> {
                       Expanded(
                         child: Center(
                           child: Text(
-                            _recipe.recipeName,
+                            _recipeProvider.recipe.recipeName,
                             style: const TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
@@ -81,7 +56,7 @@ class _ViewRecipeState extends State<ViewRecipe> {
                       ),
                       ElevatedButton(
                         onPressed: () {
-                          getRandomRecipe();
+                          _recipeProvider.getRandomRecipe(context);
                         },
                         child: const Text('Generate Recipe'),
                       ),
@@ -104,19 +79,19 @@ class _ViewRecipeState extends State<ViewRecipe> {
                       Column(
                         children: [
                           const Text('Servings', style: TextStyle(fontWeight: FontWeight.bold)),
-                          Text('${_recipe.servings}'),
+                          Text('${_recipeProvider.recipe.servings}'),
                         ],
                       ),
                       Column(
                         children: [
                           const Text('Prep Time', style: TextStyle(fontWeight: FontWeight.bold)),
-                          Text('${_recipe.prepTimeMinutes} min'),
+                          Text('${_recipeProvider.recipe.prepTimeMinutes} min'),
                         ],
                       ),
                       Column(
                         children: [
                           const Text('Cook Time', style: TextStyle(fontWeight: FontWeight.bold)),
-                          Text('${_recipe.cookTimeMinutes} min'),
+                          Text('${_recipeProvider.recipe.cookTimeMinutes} min'),
                         ],
                       ),
                     ],
@@ -141,7 +116,7 @@ class _ViewRecipeState extends State<ViewRecipe> {
                             fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8),
-                      ..._recipe.ingredients.map((ingredient) => Padding(
+                      ..._recipeProvider.recipe.ingredients.map((ingredient) => Padding(
                             padding: const EdgeInsets.symmetric(vertical: 4.0),
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -176,7 +151,7 @@ class _ViewRecipeState extends State<ViewRecipe> {
                       ),
                       const SizedBox(height: 8),
                       ...List.generate(
-                          _recipe.procedure.length,
+                          _recipeProvider.recipe.procedure.length,
                           (index) => Padding(
                                 padding:
                                     const EdgeInsets.symmetric(vertical: 8.0),
@@ -200,7 +175,7 @@ class _ViewRecipeState extends State<ViewRecipe> {
                                     ),
                                     const SizedBox(width: 8),
                                     Expanded(
-                                        child: Text(_recipe.procedure[index])),
+                                        child: Text(_recipeProvider.recipe.procedure[index])),
                                   ],
                                 ),
                               )),
