@@ -1,10 +1,7 @@
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:recipe_generator/widgets/new-recipe/ingredient_list_widget.dart';
 import 'package:recipe_generator/widgets/new-recipe/procedure_list_widget.dart';
-import '../models/ingredient.dart';
-import '../main.dart';
+import 'package:recipe_generator/providers/new_recipe_provider.dart';
 import '../pages/view_recipe.dart';
 
 class NewRecipe extends StatefulWidget {
@@ -15,168 +12,23 @@ class NewRecipe extends StatefulWidget {
 }
 
 class _NewRecipeState extends State<NewRecipe> {
-  // List of TextEditingController for recipe ingredients
-  final List<TextEditingController> _recipeIngredientTextControllers =
-      <TextEditingController>[TextEditingController()];
-  final List<Ingredient> _ingredients = [
-    Ingredient(amount: 0, unitOfMeasurement: "", ingredientName: "")
-  ];
+  late NewRecipeProvider _newRecipeProvider;
 
-  // List of TextEditingController for recipe procedure
-  final List<TextEditingController> _recipeProcedureTextControllers =
-      <TextEditingController>[TextEditingController()];
-  final List<String> _procedure = [""];
-  String _recipeName = "";
-  String _description = "";
-  int _prepTimeMinutes = 0;
-  int _cookTimeMinutes = 0;
-  int _servings = 0;
-
-  // loading state
-  bool _isLoading = false;
-
-  //function that sends the data to the backend.
-
-  Future<void> submitRecipe() async {
-    try {
-      // Set loading state to true
-      setState(() {
-        _isLoading = true;
-      });
-
-      final response = await http.post(
-        Uri.parse("http://localhost:8080/recipe/submit"),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'recipeName': _recipeName,
-          'description': _description,
-          'prepTimeMinutes': _prepTimeMinutes,
-          'cookTimeMinutes': _cookTimeMinutes,
-          'servings': _servings,
-          'ingredients': _ingredients,
-          'procedure': _procedure,
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        if (mounted) {
-          Map<String, dynamic> responseBody = jsonDecode(response.body);
-
-          // show snackbar success message.
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text(
-                  '${responseBody['recipeName']} has been submitted successfully.')));
-
-          // Navigate back to the home page after recipe submission.
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) =>
-                    const MyHomePage(title: 'Recipe Generator')),
-          );
-        }
-      } else {
-        throw Exception("Failed to submit recipe data: ${response.statusCode}");
-      }
-    } catch (error) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error submitting recipe data: $error')));
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
-  }
-
-  // lots of state management here. but app isn't that complex. Next app i'll use something more complex
-  // Add a new recipe ingredient field
-  void addRecipeIngredientField() {
-    setState(() {
-      _recipeIngredientTextControllers.add(TextEditingController());
-      _ingredients.add(
-          Ingredient(amount: 0, unitOfMeasurement: "", ingredientName: ""));
+  @override
+  void initState() {
+    super.initState();
+    _newRecipeProvider = NewRecipeProvider();
+    _newRecipeProvider.addListener(() {
+      setState(() {});
     });
   }
 
-  void addRecipeProcedureField() {
-    setState(() {
-      _recipeProcedureTextControllers.add(TextEditingController());
-      _procedure.add("");
-    });
+  @override
+  void dispose() {
+    _newRecipeProvider.dispose();
+    super.dispose();
   }
 
-  // Remove a recipe ingredient field
-  void removeRecipeIngredientField(int index) {
-    setState(() {
-      _recipeIngredientTextControllers.removeAt(index);
-      _ingredients.removeAt(index);
-    });
-  }
-
-  // Remove a recipe procedure field on field removal.
-  void removeRecipeProcedureField(int index) {
-    setState(() {
-      _recipeProcedureTextControllers.removeAt(index);
-      _procedure.removeAt(index);
-    });
-  }
-
-  // onChange for amount textfield
-  void changeAmount(String value, int index) {
-    Ingredient ingredient = _ingredients.elementAt(index);
-
-    // if the value is empty, then a
-    if (value == "") {
-      ingredient.amount = 0;
-    } else {
-      ingredient.amount = double.parse(value);
-    }
-    _ingredients[index] = ingredient;
-  }
-
-  // onChange for unitOfmeasurement textfield
-  void changeUnitOfMeasurement(String value, int index) {
-    Ingredient ingredient = _ingredients.elementAt(index);
-    ingredient.unitOfMeasurement = value;
-    _ingredients[index] = ingredient;
-  }
-
-  // onChange for IngredientName textfield
-  void changeIngredientName(String value, int index) {
-    Ingredient ingredient = _ingredients.elementAt(index);
-    ingredient.ingredientName = value;
-    _ingredients[index] = ingredient;
-  }
-
-  // onChange for changing a procedure step.
-  void changeProcedureStep(String value, int index) {
-    _procedure[index] = value;
-  }
-
-  // onchange for recipeName
-  void changeRecipeName(String value) {
-    _recipeName = value;
-  }
-
-  void changeDescription(String value) {
-    _description = value;
-  }
-
-  void changePrepTimeMinutes(String value) {
-    _prepTimeMinutes = int.parse(value);
-  }
-
-  void changeCookTimeMinutes(String value) {
-    _cookTimeMinutes = int.parse(value);
-  }
-
-  void changeServings(String value) {
-    _servings = int.parse(value);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -202,7 +54,7 @@ class _NewRecipeState extends State<NewRecipe> {
           child: Transform.scale(
               scale: 0.9,
               child: Center(
-                  child: _isLoading
+                  child: _newRecipeProvider.isLoading
                       ? CircularProgressIndicator()
                       : Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -218,7 +70,7 @@ class _NewRecipeState extends State<NewRecipe> {
                                       labelText: 'Recipe Name',
                                     ),
                                     onChanged: (value) =>
-                                        changeRecipeName(value),
+                                        _newRecipeProvider.changeRecipeName(value),
                                   ),
                                 ], //children
                               ),
@@ -234,7 +86,7 @@ class _NewRecipeState extends State<NewRecipe> {
                                           hintText: 'Enter recipe description',
                                           labelText: 'Description'),
                                       onChanged: (value) =>
-                                          changeDescription(value)),
+                                          _newRecipeProvider.changeDescription(value)),
                                 ],
                               ),
                             ),
@@ -249,7 +101,7 @@ class _NewRecipeState extends State<NewRecipe> {
                                             hintText: 'Enter prep time',
                                             labelText: 'Prep Time(min)'),
                                         onChanged: (value) =>
-                                            changePrepTimeMinutes(value)),
+                                            _newRecipeProvider.changePrepTimeMinutes(value)),
                                   ),
                                   SizedBox(width: 10),
                                   Expanded(
@@ -259,7 +111,7 @@ class _NewRecipeState extends State<NewRecipe> {
                                           hintText: 'Enter cook time',
                                           labelText: 'Cook Time(min)'),
                                       onChanged: (value) =>
-                                          changeCookTimeMinutes(value),
+                                          _newRecipeProvider.changeCookTimeMinutes(value),
                                     ),
                                   ),
                                   SizedBox(width: 10),
@@ -270,7 +122,7 @@ class _NewRecipeState extends State<NewRecipe> {
                                           hintText: 'Enter servings',
                                           labelText: 'Servings'),
                                       onChanged: (value) =>
-                                          changeServings(value),
+                                          _newRecipeProvider.changeServings(value),
                                     ),
                                   ),
                                 ],
@@ -283,16 +135,16 @@ class _NewRecipeState extends State<NewRecipe> {
                                   //change this list so that it has 3 textboxes instead of 1.
                                   IngredientListWidget(
                                       controllers:
-                                          _recipeIngredientTextControllers,
-                                      ingredients: _ingredients,
+                                          _newRecipeProvider.recipeIngredientTextControllers,
+                                      ingredients: _newRecipeProvider.ingredients,
                                       labelText: "Ingredient",
-                                      addField: addRecipeIngredientField,
-                                      removeField: removeRecipeIngredientField,
-                                      changeAmount: changeAmount,
+                                      addField: _newRecipeProvider.addRecipeIngredientField,
+                                      removeField: _newRecipeProvider.removeRecipeIngredientField,
+                                      changeAmount: _newRecipeProvider.changeAmount,
                                       changeUnitOfMeasurement:
-                                          changeUnitOfMeasurement,
+                                          _newRecipeProvider.changeUnitOfMeasurement,
                                       changeIngredientName:
-                                          changeIngredientName,
+                                          _newRecipeProvider.changeIngredientName,
                                       recipeListType: 'ingredient')
                                 ],
                               ),
@@ -303,18 +155,18 @@ class _NewRecipeState extends State<NewRecipe> {
                                 children: <Widget>[
                                   ProcedureListWidget(
                                     controllers:
-                                        _recipeProcedureTextControllers,
+                                        _newRecipeProvider.recipeProcedureTextControllers,
                                     labelText: "Procedure",
-                                    addField: addRecipeProcedureField,
-                                    removeField: removeRecipeProcedureField,
+                                    addField: _newRecipeProvider.addRecipeProcedureField,
+                                    removeField: _newRecipeProvider.removeRecipeProcedureField,
                                     recipeListType: 'procedure',
-                                    changeProcedureStep: changeProcedureStep,
+                                    changeProcedureStep: _newRecipeProvider.changeProcedureStep,
                                   )
                                 ],
                               ),
                             ),
                             ElevatedButton(
-                              onPressed: submitRecipe,
+                              onPressed: () => _newRecipeProvider.submitRecipe(context),
                               child: const Text('Save Recipe'),
                             ),
                           ],
