@@ -35,7 +35,6 @@ class _NewRecipeState extends State<NewRecipe> {
   // loading state
   bool _isLoading = false;
 
-
   //function that sends the data to the backend.
 
   Future<void> submitRecipe() async {
@@ -64,26 +63,25 @@ class _NewRecipeState extends State<NewRecipe> {
           Map<String, dynamic> responseBody = jsonDecode(response.body);
 
           // show snackbar success message.
-          ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('${responseBody['recipeName']} has been submitted successfully.'))
-          );
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text(
+                  '${responseBody['recipeName']} has been submitted successfully.')));
 
           // Navigate back to the home page after recipe submission.
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const MyHomePage(title: 'Recipe Generator')),
+            MaterialPageRoute(
+                builder: (context) =>
+                    const MyHomePage(title: 'Recipe Generator')),
           );
         }
-
-
       } else {
         throw Exception("Failed to submit recipe data: ${response.statusCode}");
       }
     } catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error submitting recipe data: $error'))
-        );
+            SnackBar(content: Text('Error submitting recipe data: $error')));
       }
     } finally {
       if (mounted) {
@@ -204,115 +202,123 @@ class _NewRecipeState extends State<NewRecipe> {
           child: Transform.scale(
               scale: 0.9,
               child: Center(
-                child: _isLoading ? CircularProgressIndicator() : Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Padding(
-                    padding: getNewRecipePadding(),
-                    child:  Column(
-                      children: [
-                        TextField(
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            hintText: 'Enter recipe name',
-                            labelText: 'Recipe Name',
-                          ),
-                          onChanged: (value) => changeRecipeName(value),
-                        ),
-                      ], //children
-                    ),
-                  ),
-                  Padding(
-                    padding: getNewRecipePadding(),
-                    child: Column(
-                      children: [
-                        TextField(
-                          maxLines: null,
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            hintText: 'Enter recipe description',
-                            labelText: 'Description'
-                          ),
-                          onChanged: (value) => changeDescription(value)
-                        ),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: getNewRecipePadding(),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            decoration: InputDecoration(
-                                border: OutlineInputBorder(),
-                                hintText: 'Enter prep time',
-                                labelText: 'Prep Time(min)'
+                  child: _isLoading
+                      ? CircularProgressIndicator()
+                      : Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Padding(
+                              padding: getNewRecipePadding(),
+                              child: Column(
+                                children: [
+                                  TextField(
+                                    decoration: InputDecoration(
+                                      border: OutlineInputBorder(),
+                                      hintText: 'Enter recipe name',
+                                      labelText: 'Recipe Name',
+                                    ),
+                                    onChanged: (value) =>
+                                        changeRecipeName(value),
+                                  ),
+                                ], //children
+                              ),
                             ),
-                          ),
-                        ),
-                        SizedBox(width: 10),
-                        Expanded(
-                          child: TextField(
-                            decoration: InputDecoration(
-                                border: OutlineInputBorder(),
-                                hintText: 'Enter cook time',
-                                labelText: 'Cook Time(min)'
+                            Padding(
+                              padding: getNewRecipePadding(),
+                              child: Column(
+                                children: [
+                                  TextField(
+                                      maxLines: null,
+                                      decoration: InputDecoration(
+                                          border: OutlineInputBorder(),
+                                          hintText: 'Enter recipe description',
+                                          labelText: 'Description'),
+                                      onChanged: (value) =>
+                                          changeDescription(value)),
+                                ],
+                              ),
                             ),
-                          ),
-                        ),
-                        SizedBox(width: 10),
-                        Expanded(
-                          child: TextField(
-                            decoration: InputDecoration(
-                                border: OutlineInputBorder(),
-                                hintText: 'Enter servings',
-                                labelText: 'Servings'
+                            Padding(
+                              padding: getNewRecipePadding(),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: TextField(
+                                        decoration: InputDecoration(
+                                            border: OutlineInputBorder(),
+                                            hintText: 'Enter prep time',
+                                            labelText: 'Prep Time(min)'),
+                                        onChanged: (value) =>
+                                            changePrepTimeMinutes(value)),
+                                  ),
+                                  SizedBox(width: 10),
+                                  Expanded(
+                                    child: TextField(
+                                      decoration: InputDecoration(
+                                          border: OutlineInputBorder(),
+                                          hintText: 'Enter cook time',
+                                          labelText: 'Cook Time(min)'),
+                                      onChanged: (value) =>
+                                          changeCookTimeMinutes(value),
+                                    ),
+                                  ),
+                                  SizedBox(width: 10),
+                                  Expanded(
+                                    child: TextField(
+                                      decoration: InputDecoration(
+                                          border: OutlineInputBorder(),
+                                          hintText: 'Enter servings',
+                                          labelText: 'Servings'),
+                                      onChanged: (value) =>
+                                          changeServings(value),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: getNewRecipePadding(),
-                    child: Column(
-                      children: <Widget>[
-                        //change this list so that it has 3 textboxes instead of 1.
-                        IngredientListWidget(
-                            controllers: _recipeIngredientTextControllers,
-                            ingredients: _ingredients,
-                            labelText: "Ingredient",
-                            addField: addRecipeIngredientField,
-                            removeField: removeRecipeIngredientField,
-                            changeAmount: changeAmount,
-                            changeUnitOfMeasurement: changeUnitOfMeasurement,
-                            changeIngredientName: changeIngredientName,
-                            recipeListType: 'ingredient')
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: getNewRecipePadding(),
-                    child: Column(
-                      children: <Widget>[
-                        ProcedureListWidget(
-                          controllers: _recipeProcedureTextControllers,
-                          labelText: "Procedure",
-                          addField: addRecipeProcedureField,
-                          removeField: removeRecipeProcedureField,
-                          recipeListType: 'procedure',
-                          changeProcedureStep: changeProcedureStep,
-                        )
-                      ],
-                    ),
-                  ),
-                  ElevatedButton(
-                    onPressed: submitRecipe,
-                    child: const Text('Save Recipe'),
-                  ),
-                ],
-              ))),
+                            Padding(
+                              padding: getNewRecipePadding(),
+                              child: Column(
+                                children: <Widget>[
+                                  //change this list so that it has 3 textboxes instead of 1.
+                                  IngredientListWidget(
+                                      controllers:
+                                          _recipeIngredientTextControllers,
+                                      ingredients: _ingredients,
+                                      labelText: "Ingredient",
+                                      addField: addRecipeIngredientField,
+                                      removeField: removeRecipeIngredientField,
+                                      changeAmount: changeAmount,
+                                      changeUnitOfMeasurement:
+                                          changeUnitOfMeasurement,
+                                      changeIngredientName:
+                                          changeIngredientName,
+                                      recipeListType: 'ingredient')
+                                ],
+                              ),
+                            ),
+                            Padding(
+                              padding: getNewRecipePadding(),
+                              child: Column(
+                                children: <Widget>[
+                                  ProcedureListWidget(
+                                    controllers:
+                                        _recipeProcedureTextControllers,
+                                    labelText: "Procedure",
+                                    addField: addRecipeProcedureField,
+                                    removeField: removeRecipeProcedureField,
+                                    recipeListType: 'procedure',
+                                    changeProcedureStep: changeProcedureStep,
+                                  )
+                                ],
+                              ),
+                            ),
+                            ElevatedButton(
+                              onPressed: submitRecipe,
+                              child: const Text('Save Recipe'),
+                            ),
+                          ],
+                        ))),
         ));
   }
 

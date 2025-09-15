@@ -9,7 +9,6 @@ class Recipe {
   List<Ingredient> ingredients;
   List<String> procedure;
 
-
   Recipe({
     required this.recipeName,
     required this.description,
@@ -27,7 +26,6 @@ class Recipe {
 
     // grab ingredients from json object.
     for (var i = 0; i < json['ingredients'].length; i++) {
-
       ingredients.add(Ingredient.fromJson(json['ingredients'][i]));
     }
 
@@ -47,5 +45,3 @@ class Recipe {
     );
   }
 }
-
-
