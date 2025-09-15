@@ -37,6 +37,17 @@ class NewRecipeProvider extends ChangeNotifier {
   int get servings => _servings;
   bool get isLoading => _isLoading;
 
+  @override
+  void dispose() {
+    for (var controller in _recipeIngredientTextControllers) {
+      controller.dispose();
+    }
+    for (var controller in _recipeProcedureTextControllers) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
   //function that sends the data to the backend.
   Future<void> submitRecipe(BuildContext context) async {
     try {
@@ -128,7 +139,7 @@ class NewRecipeProvider extends ChangeNotifier {
     if (value == "") {
       ingredient.amount = 0;
     } else {
-      ingredient.amount = double.parse(value);
+      ingredient.amount = double.tryParse(value) ?? 0.0;
     }
     _ingredients[index] = ingredient;
   }
@@ -162,14 +173,17 @@ class NewRecipeProvider extends ChangeNotifier {
   }
 
   void changePrepTimeMinutes(String value) {
-    _prepTimeMinutes = int.parse(value);
+    if (value.isEmpty) return;
+    _prepTimeMinutes = int.tryParse(value) ?? 0;
   }
 
   void changeCookTimeMinutes(String value) {
-    _cookTimeMinutes = int.parse(value);
+    if (value.isEmpty) return;
+    _cookTimeMinutes = int.tryParse(value) ?? 0;
   }
 
   void changeServings(String value) {
-    _servings = int.parse(value);
+    if (value.isEmpty) return;
+    _servings = int.tryParse(value) ?? 0;
   }
 }

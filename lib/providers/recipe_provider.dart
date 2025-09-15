@@ -23,7 +23,7 @@ class RecipeProvider extends ChangeNotifier {
       final response =
           await http.get(Uri.parse("http://localhost:8080/recipe/random"));
 
-      if (response.statusCode == 200) {
+      if (response.statusCode >= 200 && response.statusCode < 300) {
         // debug
         Map<String, dynamic> responseBody = jsonDecode(response.body);
         //set the recipe after getting it from the backend.

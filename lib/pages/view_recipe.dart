@@ -18,7 +18,9 @@ class _ViewRecipeState extends State<ViewRecipe> {
     _recipeProvider.addListener(() {
       setState(() {});
     });
-    _recipeProvider.getRandomRecipe(context);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _recipeProvider.getRandomRecipe(context);
+    });
   }
 
   @override

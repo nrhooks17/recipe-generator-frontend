@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:recipe_generator/widgets/new-recipe/ingredient_list_widget.dart';
 import 'package:recipe_generator/widgets/new-recipe/procedure_list_widget.dart';
 import 'package:recipe_generator/providers/new_recipe_provider.dart';
@@ -96,9 +97,13 @@ class _NewRecipeState extends State<NewRecipe> {
                                 children: [
                                   Expanded(
                                     child: TextField(
+                                        keyboardType: TextInputType.number,
+                                        inputFormatters: [
+                                          FilteringTextInputFormatter.digitsOnly,
+                                        ],
                                         decoration: InputDecoration(
                                             border: OutlineInputBorder(),
-                                            hintText: 'Enter prep time',
+                                            hintText: 'Enter numbers only',
                                             labelText: 'Prep Time(min)'),
                                         onChanged: (value) =>
                                             _newRecipeProvider.changePrepTimeMinutes(value)),
@@ -106,9 +111,13 @@ class _NewRecipeState extends State<NewRecipe> {
                                   SizedBox(width: 10),
                                   Expanded(
                                     child: TextField(
+                                      keyboardType: TextInputType.number,
+                                      inputFormatters: [
+                                        FilteringTextInputFormatter.digitsOnly,
+                                      ],
                                       decoration: InputDecoration(
                                           border: OutlineInputBorder(),
-                                          hintText: 'Enter cook time',
+                                          hintText: 'Enter numbers only',
                                           labelText: 'Cook Time(min)'),
                                       onChanged: (value) =>
                                           _newRecipeProvider.changeCookTimeMinutes(value),
@@ -117,9 +126,13 @@ class _NewRecipeState extends State<NewRecipe> {
                                   SizedBox(width: 10),
                                   Expanded(
                                     child: TextField(
+                                      keyboardType: TextInputType.number,
+                                      inputFormatters: [
+                                        FilteringTextInputFormatter.digitsOnly,
+                                      ],
                                       decoration: InputDecoration(
                                           border: OutlineInputBorder(),
-                                          hintText: 'Enter servings',
+                                          hintText: 'Enter numbers only',
                                           labelText: 'Servings'),
                                       onChanged: (value) =>
                                           _newRecipeProvider.changeServings(value),

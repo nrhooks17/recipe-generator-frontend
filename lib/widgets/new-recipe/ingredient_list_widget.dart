@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:recipe_generator/models/ingredient.dart';
 import 'package:recipe_generator/widgets/new-recipe/recipe_list_widget.dart';
 
@@ -28,9 +29,12 @@ class IngredientListWidget extends RecipeListWidget {
         child: TextField(
           keyboardType:
           TextInputType.numberWithOptions(decimal: true),
+          inputFormatters: [
+            FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+          ],
           textAlign: TextAlign.right,
           decoration: InputDecoration(
-              hintText: 'unit amount',
+              hintText: 'Enter number',
               labelText: 'Unit amount',
               border: OutlineInputBorder(),
               prefixIcon: IconButton(
