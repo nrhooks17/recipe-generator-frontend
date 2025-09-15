@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'utils/alert.dart';
 import 'pages/new_recipe.dart';
 import 'pages/view_recipe.dart';
+import 'config/app_theme.dart';
+import 'config/app_constants.dart';
 
 
 void main() {
@@ -16,12 +18,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Recipe Generator',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigoAccent),
-        useMaterial3: true,
-      ),
-      home: const MyHomePage(title: 'Recipe Generator'),
+      title: AppConstants.appTitle,
+      theme: AppTheme.lightTheme,
+      home: const MyHomePage(title: AppConstants.appTitle),
     );
   }
 }
@@ -50,11 +49,11 @@ class _MyHomePageState extends State<MyHomePage> {
           children: <Widget>[
              ElevatedButton(
               onPressed: () {
-                AlertUtil.showAlert(context, "Generate Random Recipe", "Generating a random recipe...");
+                AlertUtil.showAlert(context, "Generate Random Recipe", AppConstants.generateRandomRecipeMessage);
               },
-              child: const Text('Generate Recipe from AI'),
+              child: const Text(AppConstants.generateFromAIButton),
             ),
-            const SizedBox(height: 13),
+            const SizedBox(height: AppTheme.paddingMedium),
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
@@ -62,9 +61,9 @@ class _MyHomePageState extends State<MyHomePage> {
                   MaterialPageRoute(builder: (context) => const NewRecipe()),
                 );
               },
-              child: const Text('Store New Recipe')
+              child: const Text(AppConstants.storeNewRecipeButton)
             ),
-            const SizedBox(height: 13),
+            const SizedBox(height: AppTheme.paddingMedium),
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
@@ -72,7 +71,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   MaterialPageRoute(builder: (context) => const ViewRecipe()),
                 );
               },
-              child: const Text('Select Stored Recipe')
+              child: const Text(AppConstants.selectStoredRecipeButton)
             )
           ],
         ),
