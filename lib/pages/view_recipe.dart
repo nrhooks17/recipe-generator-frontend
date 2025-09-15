@@ -46,14 +46,28 @@ class _ViewRecipeState extends State<ViewRecipe> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Expanded(
-                        child: Center(
-                          child: Text(
-                            _recipeProvider.recipe.recipeName,
-                            style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              _recipeProvider.recipe.recipeName,
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              textAlign: TextAlign.center,
                             ),
-                          ),
+                            const SizedBox(height: 8),
+                            Text(
+                              _recipeProvider.recipe.description,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontStyle: FontStyle.italic,
+                                color: Colors.grey,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
                         ),
                       ),
                       ElevatedButton(
@@ -99,6 +113,7 @@ class _ViewRecipeState extends State<ViewRecipe> {
                     ],
                   ),
                 ),
+
 
                 // Row 2: Ingredients container
                 Container(
